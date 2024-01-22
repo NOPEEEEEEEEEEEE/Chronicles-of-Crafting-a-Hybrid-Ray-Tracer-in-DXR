@@ -1,15 +1,33 @@
-# Introduction
+# Chronicles of Crafting a Hybrid RayTracer in DXR
+
+
+# Who am I? What is this about?
+
+My name is Bogdan Depărățeanu, and I am an Year 2 student at BUAS. This project was implemented under supervision from my teachers and it had the purpose of self-study.
+
+This project was my first experience with 3D ray tracing (and DXR), and I intend to present the features I managed to implement and maybe go through some of the mistakes I realized I made.
+
+
 
 ![shadow](/assets/All.png) 
 
 # My initial planning for this project:
 
-Hybrid pipeline
-Shadows
-Reflections 
-Refractions
-Ambient Occlusion
-Support for multiple lights
+#### The order represents how I initially set the priority for those features.
+
+* **Hybrid Pipeline**
+
+* **Shadows**
+
+* **Reflections** 
+
+* Refractions
+
+* **Ambient Occlusion**
+
+* Support for multiple lights
+
+#### The bolded features represent what I managed to implement in the time I had at hand. 
 
 
 # Hybrid Ray Tracing
@@ -39,6 +57,34 @@ For my project, I have used 4 render targets, for storing the world position of 
 Rasterizers are very fast, so using the G-Buffer to avoid shooting the primary rays with the ray tracer would give the application a boost in performance(that's true at least for older hardware that was not optimized specifically for ray tracing).
 
 ### How to do this with DX12 ?
+
+
+```cpp
+  CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_RTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+    m_posBuffer = 
+        CreateRTVBuffer(device, rtvHandle);
+
+      m_normalBuffer = CreateRTVBuffer(device, rtvHandle);
+   
+      m_colorBuffer = CreateRTVBuffer(device, rtvHandle);
+
+        m_materialBuffer = CreateRTVBuffer(device, rtvHandle);
+```
+
+
+```cpp
+
+            D3D12_CPU_DESCRIPTOR_HANDLE srvHandle = m_srvUavHeap->GetCPUDescriptorHandleForHeapStart();
+
+            D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+            uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+            m_device_manager->m_Device->CreateUnorderedAccessView(m_device_manager->m_posBuffer.Get(), nullptr, &uavDesc, srvHandle);
+
+            srvHandle.ptr +=
+                m_device_manager->m_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        
+```
 
 
 ## Using the G-Buffer in the ray tracer
@@ -72,12 +118,13 @@ Ambient occlusion helps with defining the environmental occlusion of the ambient
 
 ## Reflections and PBR
 
-The reflections 
+The reflections are dependent on the PBR material. I am using a Cook-Torrance BRDF to define the distribution of the rays based on the roughness and to define the contribution it has.
 
 ![reflections](/assets/Reflections.png) 
 
 
-
+    
 
 
 ![buas logo](/assets/Logo_BUas.png) 
+
