@@ -146,6 +146,8 @@ The G-Buffer could also be passed as an SRV in the ray tracing pass, since I am 
 
 Accessing the G-Buffer in the ray generation shader is very convenient. The texture is declared as an array, and the offset from the first UAV declared in the descriptor heap is uased as an index, to get the desired texture.
 
+The data collected from the texture is then used for shadows, reflections and ambient occlusion.
+
 ### Ambient Occlusion
 
 Ambient occlusion was the simplest feature to implement, but it's a feature with a great impact. It requires generating a random point on a hemisphere, and tracing a ray in that direction. 
@@ -154,11 +156,6 @@ In case no geometry is hit by the ray, a counter is incremented by 1. When some 
 
 The counter is then divided by the number of samples, and the returned result is then multiplied with the direct illumination radiance.
 
-[View the interactive slider](./index.html)
-
-<iframe src="https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=f45698fe-b9ff-11ee-9ddd-3f41531135b6" width="100%" height="auto" frameborder="0" scrolling="no"></iframe>
-
-<iframe frameborder="0" class="juxtapose" width="100%" height="360" src="https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=f45698fe-b9ff-11ee-9ddd-3f41531135b6"></iframe>
 
 ![buas logo](/assets/Logo_BUas.png) 
 
