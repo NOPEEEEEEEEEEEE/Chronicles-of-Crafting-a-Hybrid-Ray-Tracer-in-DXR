@@ -70,7 +70,7 @@ Soft shadows and are achieved by tracing multiple samples towards the light sour
 
 By summing up all the sampled results, the shadow becomes smoother towards the edges.
 
-<iframe frameborder="0" class="juxtapose" width="100%" height="795.9513358778626" src="https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=eaad38e4-bae0-11ee-9ddd-3f41531135b6"></iframe>
+<iframe frameborder="0" class="juxtapose" width="100%" height="495.9513358778626" src="https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=eaad38e4-bae0-11ee-9ddd-3f41531135b6"></iframe>
 
 ### Ambient Occlusion
 
@@ -95,7 +95,7 @@ The metallic value influences each reflection ray's contribution.
 
 Firefly reduction is a method of filtering noise, targeting the elimination of abnormally bright pixels. These bright spots, often referred to as 'fireflies', arise from sampling directions that, while low in probability, yield disproportionately high energy. This could employ loss of energy throughout the scene, since removing the bright pixels means removal of energy. However, this loss is a worthwhile sacrifice for the significant improvement it brings to the image quality. 
 
-<iframe frameborder="0" class="juxtapose" width="100%" height="846.3876923076923" src="https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=6fc215b2-baf1-11ee-9ddd-3f41531135b6"></iframe>
+<iframe frameborder="0" class="juxtapose" width="100%" height="546.3876923076923" src="https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=6fc215b2-baf1-11ee-9ddd-3f41531135b6"></iframe>
 
 
 # My journey implementing all this in DXR
@@ -420,7 +420,7 @@ This algorithm uses an user input value as a threshold, to keep the pixels that 
 
 ## Conclusions
 
-<iframe frameborder="0" class="juxtapose" width="100%" height="366" src="https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=bf787e24-bb0b-11ee-9ddd-3f41531135b6"></iframe>
+<iframe frameborder="0" class="juxtapose" width="100%" height="466" src="https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=bf787e24-bb0b-11ee-9ddd-3f41531135b6"></iframe>
 
 The information presented here is minimal, but hopefully, it sparks interest in this field. This project proved to be an invaluable source of knowledge for me, and I totally recommend giving it a try. 
 
