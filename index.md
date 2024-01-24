@@ -420,7 +420,7 @@ This algorithm uses an user input value as a threshold, to keep the pixels that 
 
 ## Conclusions
 
-<iframe frameborder="0" class="juxtapose" width="100%" height="766" src="https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=bf787e24-bb0b-11ee-9ddd-3f41531135b6"></iframe>
+<iframe frameborder="0" class="juxtapose" width="100%" height="366" src="https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=bf787e24-bb0b-11ee-9ddd-3f41531135b6"></iframe>
 
 The information presented here is minimal, but hopefully, it sparks interest in this field. This project proved to be an invaluable source of knowledge for me, and I totally recommend giving it a try. 
 
