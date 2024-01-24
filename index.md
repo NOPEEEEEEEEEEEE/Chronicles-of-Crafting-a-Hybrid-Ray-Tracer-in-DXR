@@ -1,16 +1,19 @@
-# Chronicles of Crafting a Hybrid RayTracer in DXR
 
+In an time where advanced hardware overshadows the usage of a hybrid ray tracer, the art of using this rendering method remains a valuable exercise for mastering DX12 or any other graphics API. This approach not only sharpens one's skills in managing multiple render targets but also in implementing a deferred pipeline.
 
+This article serves as a source of essential information on hybrid ray tracing, coupled with insights from my personal journey in applying this theory using DX12. The theoretical aspects are universally applicable, regardless of the graphics API you choose. The second half of this article delves into my journey in developing a hybrid ray tracer with DXR and HLSL.
 
-This project was my first experience with 3D ray tracing (and DXR), and I intend to present the features I managed to implement and maybe go through some of the mistakes I realized I made.
+This project was my first experience with 3D ray tracing (and DXR), so please take all the information with a grain of salt.
 
-
+Before reading the article, I recommend  watching this video as an introduction to ray tracing. While my article lays down the fundamental concepts, additional visual context can greatly enhance your understanding.
 
 ![shadow](/assets/All.png) 
 
 # My initial planning for this project:
 
 #### Below is the hierarchy of these features, reflecting my initial strategy and focus areas:
+
+My focus was on building a ray tracer that would run in real time. For that purpose, I chose to implement the following features:
 
 * **Hybrid Pipeline**
 
@@ -30,63 +33,63 @@ This project was my first experience with 3D ray tracing (and DXR), and I intend
 
 ## Hybrid Ray Tracing
 
-A hybrid ray tracing pipeline consists of a rasterization pass that writes a G-Buffer that is then used to reconstruct the scene in the ray tracer.
+A hybrid ray tracing pipeline involves a rasterization pass, creating a G-Buffer for scene reconstruction in the ray tracer.
 
 ### Using a rasterizer to write a G-Buffer
 
-A G-Buffer is a series of multiple textures that contain data about the geometry within the scene, as it is seen from the perspective of the camera. So basically, what this pass does is use a rasterizer to render multiple render targets that contain screen space information about the scene.
+A G-Buffer comprises multiple textures that hold data about the scene’s geometry from the camera's viewpoint. This step uses a rasterizer to render multiple render targets containing screen space information about the scene.
 
 ![Hybrid](/assets/Hybrid_RTs.png) 
 
-For my project, I have used 4 render targets, for storing the world position of the pixels, the surface normals, the albedo color and the material information of the surfaces(roughness and metallic, more on this later)
+For my project, I used four render targets to store the world positions of pixels, surface normals, albedo color, and material information (roughness and metallic properties).
 
 
 ### Why do this?
 
-Rasterizers are very fast, so using the G-Buffer to avoid shooting the primary rays with the ray tracer would give the application a boost in performance(that's true at least for older hardware that was not optimized specifically for ray tracing).
+Rasterizers are fast, so leveraging a G-Buffer to avoid the need for primary rays(the rays traced from the camera towards the scene) in the ray tracer boosts performance, particularly on older hardware not optimized for ray tracing.
 
 
 ### Using the G-Buffer in the ray tracer
 
-Normally, a ray has to be traced for each of the pixels on the screen, from the camera to the scene. Each ray has to be checked against the geometry in the scene(which is not that slow if you use acceleration structures), and return values like color or distance(these are called the primary rays). 
+Normally, a ray has to be traced for each of the pixels on the screen, from the camera to the scene. Each ray has to be checked against the geometry in the scene and return values like color or distance. 
 
-All of the data that that is collected with the primary rays, can also be collected from the G-Buffer, but with an lower performance cost.
+All of the data that that is collected with the primary rays, can also be collected from the G-Buffer with a lower performance cost.
 
-The textures are accessed within the ray generation shader and the data that is provided within them can be used to trace other types of rays(e.g. shadow rays, reflection rays, ambient occlusion rays).
+Textures in the ray generation shader access this data, aiding in tracing other ray types like shadow, reflection, and ambient occlusion rays.
 
-## What can my ray tracer do?
+## Capabilities of My Ray Tracer
 
-This is a distributed ray tracer. That means that for each type of effect, I am tracing multiple samples and integrating over their contributions. This would cause noise, due to its sthocastic nature, but more samples means a closer result to a realistic illumination, and we always have the option to use the samples from the past frames and improve the result.
+This distributed ray tracer traces multiple samples for each effect and integrates their contributions.  While this process introduces noise due to its sthocastic nature, more samples yield results closer to realistic illumination. Past frame samples can also be used for refinement.
 
 ### Shadows
 
-In order to achieve realistic shadows, they have to have a "smooth" falloff. This is because in real life, lights are not infinitely small points, but entire areas, causing the light to fall unevenly around an object's shadow, making it softer towards the edges.
+Realistic shadows require a smooth falloff, as lights in reality are not point sources but areas, causing the light to fall unevenly around an object's shadow, making it softer towards the edges.
 
-Soft shadows and are achieved by tracing multiple samples towards the light source. The ray has to be directed towards any random point on that light souce. This way, the samples closer to the edge of the shadow have a smaller probability of hiting the object that is casting the shadow. By adding up all the results from the samples, the shadow becomes smoother towards the edges.
+Soft shadows and are achieved by tracing multiple samples towards the light source. Each ray targets a random point on the light source, making edge-near samples less likely to intersect the shadow-casting object.
 
+By summing up all the sampled results, the shadow becomes smoother towards the edges.
 
 ![shadow](/assets/Soft_Shadow.png) 
 ![shadow](/assets/Hard_Shadow.png) 
 
 ### Ambient Occlusion
 
-Ambient occlusion helps with defining the environmental occlusion of the ambiental light. This is achieved by tracing rays from a surface in random directions and using the number of hits and the distance to the geometry that was hit by the rays to define how occluded is that surface.
+Ambient occlusion helps with defining the environmental occlusion of the ambiental light. This is achieved by tracing rays in random directions from a surface and using the number of hits and the distances to impacted geometry to determine surface occlusion.
 
 ![ao](/assets/AO.png) 
 
 ### Reflections and PBR
-The reflections are the part of indirect lighting, that is affected by the angle of incidence(between the light ray and the surface normal) and the angle of the camera relative to the reflected ray.
+The reflections are the part of indirect lighting, that are affected by the angle of incidence(between the light ray and the surface normal) and the angle of the camera relative to the reflected ray.
 
-In ray tracing, the light is calculated the opposite way light works in real life. A ray is sent from the camera towards a surface, then the angle between the ray and the surface normal is used to calculate the reflected ray, which would hit other illuminated geometry and return the respective color. 
+In ray tracing, light calculation is reversed compared to real life. A ray sent from the camera to a surface uses the angle with the surface normal to compute the reflected ray, which then interacts with other illuminated geometry.
 
-For a more realistic result, PBR(Phisically Based Rendering) is used. PBR defines the properties of a material using 2 values: roughness and metallic. The most widely used illumination modelusing these values is the  Cook-Torrance microfacet model. This model states that surfaces are made from tiny microfacets that reflect the light perfectly, like a mirror.
+PBR (Physically Based Rendering) enhances realism. It defines material properties with two values: roughness and metallic. The Cook-Torrance microfacet model, a widely used illumination model, considers surfaces as collections of tiny, perfectly reflecting microfacets.
 
- The roughness value describes how scattered are the angles of these microfacets. We can apply this information to ray tracing, by sampling random directions for those microfacets, distributing the angle of these based on a mathematical formula. We then use the angle of the microfacets instead of the surface normal, to calculate the reflected rays. This will cause the ray tracer to sample light contributions from a wider angle and cause the material to look rougher, or from a smaller angle if the roughness is lower.
+ Roughness affects the scattering of these microfacet angles.In ray tracing, this translates to sampling random microfacet directions, with the distribution based on a mathematical formula. We then use the angle of the microfacets instead of the surface normal, to calculate the reflected rays.  Different angles lead to varied light contributions, altering the material's appearance.
 
- The metallic value is relevant when calculating the contribution of each reflection ray.
+The metallic value influences each reflection ray's contribution.
 
 ![reflections](/assets/Reflections.png) 
-
 
 # My journey implementing all this in DXR
 
@@ -134,7 +137,7 @@ After adding up all the contributions from all the samples, I divided the result
 For the hybrid pipeline, I am using 4 buffers. For each of them I stored one render target descriptor in a hescriptor heap, and one UAV descriptor in the descriptor heap that I use in the ray tracing pass(UAV's are nice because they allow both reading and writing). 
 This way,I can use the same resource for both the rasterizer and for the ray tracer, without having to copy anything.
 
-The render targets are bound to the pipeline using OMSetRenderTargets. I have to make use of the position within the descriptor heap of the render targes when creating the CPU descriptor handles.
+The render targets are bound to the pipeline using OMSetRenderTargets. I have to make use of the position within the descriptor heap of the render targes when creating the CPU descriptor handles. If you're using ImGUI, make sure you use OMSetRenderTargets to bind your back buffers before rendering it.
 
 The states of the resources have to be changed from RTV to UAV after the rasterizer pass and swaped back after the ray tracing pass.
 
@@ -155,6 +158,22 @@ Ambient occlusion was the simplest feature to implement, but it's a feature with
 In case no geometry is hit by the ray, a counter is incremented by 1. When some geometry is hit, the hit shader returns the distance to that hit point. The counter is incremented by the distance divided by the maximum length of the ray. 
 
 The counter is then divided by the number of samples, and the returned result is then multiplied with the direct illumination radiance.
+
+
+## Conclusions
+
+The information I presented here was minimal, but I hope it was enough to spark your interest. This project was a great source of information for me, and I totally recommend giving it a try. 
+
+Based on my experience, DXR was a great API to use for this purpose. It is a bit of struggle to understand it in the beginning, but once you get the hang of it, it's a realy great tool.
+
+The foundation I laid with this provides further possibilities for interesting features.
+
+For more information, here are some of the resources I used:
+
+<iframe src="https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=f45698fe-b9ff-11ee-9ddd-3f41531135b6" width="100%" height="auto" frameborder="0" scrolling="no"></iframe>
+
+<iframe frameborder="0" class="juxtapose" width="100%" height="360" src="https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=f45698fe-b9ff-11ee-9ddd-3f41531135b6"></iframe>
+
 
 
 ![buas logo](/assets/Logo_BUas.png) 
