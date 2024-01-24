@@ -131,9 +131,20 @@ After adding up all the contributions from all the samples, I divided the result
 
 ### Hybrid pipeline
 
-For the hybrid pipeline, I am using 4 buffers. For each of them I stored one render target descriptor in a hescriptor heap, and one UAV descriptor in the descriptor heap that I use in the ray tracing pass. This way, I can just change the states of the resources between the passes, without having to copy anything.
+For the hybrid pipeline, I am using 4 buffers. For each of them I stored one render target descriptor in a hescriptor heap, and one UAV descriptor in the descriptor heap that I use in the ray tracing pass(UAV's are nice because they allow both reading and writing). 
+This way,I can use the same resource for both the rasterizer and for the ray tracer, without having to copy anything.
+
+The render targets are bound to the pipeline using OMSetRenderTargets. I have to make use of the position within the descriptor heap of the render targes when creating the CPU descriptor handles.
+
+The states of the resources have to be changed from RTV to UAV after the rasterizer pass and swaped back after the ray tracing pass.
 
 
+Before the ray tracing pass, the hescriptor heap containing the views for the resources needed shall be bound to the pipeline.
+
+
+The G-Buffer could also be passed as an SRV in the ray tracing pass, since I am doing no writing in this stage on these resources.
+
+Accessing the G-Buffer in the ray generation shader is very convenient. The texture is declared as an array, and the offset from the first UAV declared in the descriptor heap is uased as an index, to get the desired texture.
 
 ### Ambient Occlusion
 
@@ -142,6 +153,12 @@ Ambient occlusion was the simplest feature to implement, but it's a feature with
 In case no geometry is hit by the ray, a counter is incremented by 1. When some geometry is hit, the hit shader returns the distance to that hit point. The counter is incremented by the distance divided by the maximum length of the ray. 
 
 The counter is then divided by the number of samples, and the returned result is then multiplied with the direct illumination radiance.
+
+[View the interactive slider](./index.html)
+
+<iframe src="https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=f45698fe-b9ff-11ee-9ddd-3f41531135b6" width="100%" height="auto" frameborder="0" scrolling="no"></iframe>
+
+<iframe frameborder="0" class="juxtapose" width="100%" height="360" src="https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=f45698fe-b9ff-11ee-9ddd-3f41531135b6"></iframe>
 
 ![buas logo](/assets/Logo_BUas.png) 
 
