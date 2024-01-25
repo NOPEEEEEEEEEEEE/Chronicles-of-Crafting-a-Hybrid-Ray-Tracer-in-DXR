@@ -1,5 +1,5 @@
 
-In an time where advanced hardware overshadows the usage of a hybrid ray tracer, the art of using this rendering method remains a valuable exercise for mastering DX12 or any other graphics API. This approach not only sharpens one's skills in managing multiple render targets but also in implementing a deferred pipeline.
+In a time where advanced hardware overshadows the usage of a hybrid ray tracer, the art of using this rendering method remains a valuable exercise for mastering DX12 or any other graphics API. This approach not only sharpens one's skills in managing multiple render targets but also in implementing a deferred pipeline.
 
 This article serves as a source of essential information on hybrid ray tracing, coupled with insights from my personal journey in applying this theory using DX12. The theoretical aspects are universally applicable, regardless of the graphics API you choose. The second half of this article delves into my journey in developing a hybrid ray tracer with DXR and HLSL.
 
@@ -101,7 +101,7 @@ Firefly reduction is a method of filtering noise, targeting the elimination of a
 # My journey implementing all this in DXR
 
 ### Setting up DXR
-As a code base for this project, I used my Dx12 rasterizer project that I made for my previous uni block. 
+As a code base for this project, I used my previous DX12 rasterizer project.
 
 I started with my DX12 rasterizer project, setting up the DXR pipeline, shader tables, resource descriptor heap, and acceleration structures using NVIDIA's DXR helpers. [Here](https://developer.nvidia.com/rtx/raytracing/dxr/dx12-raytracing-tutorial-part-1) you can find the Nvidia tutorials on doing all this.
 
