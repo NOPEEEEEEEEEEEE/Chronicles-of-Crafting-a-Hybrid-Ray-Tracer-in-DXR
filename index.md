@@ -359,7 +359,7 @@ The data collected from the texture is then used for the computation of the shad
 ```
 ### Ambient Occlusion
 
-Ambient occlusion was the simplest feature to implement, yet it's a feature with a great impact, adding depth and realism to the scene. 
+Ambient occlusion was the simplest feature to implement, yet it's a feature with a great impact, adding depth and realism to the scene.
 
 #### Generating Rays for Ambient Occlusion
 
